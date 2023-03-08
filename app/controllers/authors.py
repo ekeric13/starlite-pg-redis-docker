@@ -1,9 +1,22 @@
 # pyright: reportGeneralTypeIssues=false
 from uuid import UUID
+import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlite import Dependency, Provide, Router, delete, get, post, put
+from starlite import (
+    Dependency,
+    Provide,
+    Router,
+    delete,
+    get,
+    post,
+    put,
+    UploadFile,
+    Body,
+    RequestEncodingType,
+)
 from starlite.status_codes import HTTP_200_OK
+
 
 from app.domain.authors import Author, CreateDTO, ReadDTO, Repository, Service, WriteDTO
 from app.lib.repository.types import FilterTypes
@@ -26,9 +39,16 @@ async def get_authors(
 
 
 @post()
-async def create_author(data: CreateDTO, service: Service) -> ReadDTO:
+async def create_author(
+    data: UploadFile = Body(media_type=RequestEncodingType.MULTI_PART),
+) -> None:
     """Create an `Author`."""
-    return ReadDTO.from_orm(await service.create(Author.from_dto(data)))
+    content = await data.read()
+    filename = data.filename
+    logging.info("IN CREATE AUTHOR")
+    logging.info(filename)
+    logging.info(content)
+    return
 
 
 @get(DETAIL_ROUTE)
